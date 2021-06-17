@@ -10,3 +10,4 @@ import signal
 import tensorflow.contrib as tc
 
 import tensorflow.contrib.slim as slim
+import random
