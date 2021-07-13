@@ -112,3 +112,38 @@ def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
     
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+# #adam
+optimizer = tf.train.AdamOptimizer(lr).minimize(cost)
+# # sgd&momentum
+# optimizer = tf.train.MomentumOptimizer(lr,0.9).minimize(cost)
+  
+correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())   #初始化所有参数
+
+    for idx in range(epoch):
+        step = 1
+        print('current lr:',current_lr)
+        # 每一轮次都打乱
+        num_examples=train_audio.shape[0]
+        perm = numpy.arange(num_examples)
+        numpy.random.shuffle(perm)
+#         if idx > 1:
+#             numpy.random.shuffle(perm)
+#             print('shuffle')
+        
+  
+        visuals = train_visual[perm]
+        audios = train_audio[perm]
+        texts = train_text[perm]
+        
+        labels = train_label[perm]
+        
+        
+        current_lr=current_lr * learning_rate_decay
+
+        lr.assign(current_lr).eval()    # 可变学习率赋值
