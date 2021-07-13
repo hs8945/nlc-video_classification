@@ -121,3 +121,68 @@ def new_context_gating(name, input_layer):
         l2_penalty = 1e-8
         
         return activation
+
+    
+  # NetVLAD 2016 CVPR NetVLAD: CNN architecture for weakly supervised place recognition
+def NetVLAD(name,reshaped_input, feature_size=512, max_samples=6, cluster_size=32,output_dim=256,  group=128, add_batch_norm=True):
+
+    with tf.variable_scope(name + 'forward'):
+        #####################################################################################################################
+        # 聚类
+        reshaped_input = tf.reshape(reshaped_input, [-1, feature_size])       # 生成 所有的帧级特征，每一行即是一个关键帧的特征
+        
+        cluster_weights = tf.get_variable("cluster_weights",[feature_size, cluster_size],
+                                            initializer = tf.random_normal_initializer(stddev=1 / math.sqrt(feature_size))
+                                          )
+       
+        activation = tf.matmul(reshaped_input, cluster_weights)
+        
+        if add_batch_norm:
+            activation = slim.batch_norm( activation,center=True,scale=True,is_training=True, scope="cluster_bn")
+        else:
+            cluster_biases = tf.get_variable("cluster_biases",[cluster_size],initializer = tf.random_normal_initializer(stddev=1 / math.sqrt(feature_size)))
+            activation += cluster_biases
+            activation = tf.nn.softmax(activation)                             # softmax函数得到该局部特征属于每个中心眯的概率/权重，然后 将其指派给具有最大的概率/权重的中心点 软分配，每个微视频的分配率
+
+        activation = tf.reshape(activation,[-1, max_samples, cluster_size])   # 软分配，每个微视频中的关键帧的分配率
+        #################################################################################################################
+        # 第1步：  被减数  论文公式6展开后半部分 a(x)*c(j)
+
+        a_sum = tf.reduce_sum(activation,1,keep_dims=True) # 每个样本中的 所有帧相对应的维进行求行 [none, 1, self.cluster_size] (?, 1, 64)  ?个样本，1行，64列 每个视频中的所有帧对应求和
+
+
+        # 聚类中心，也是学出来的 
+        cluster_weights2 = tf.get_variable("cluster_weights2", [1, feature_size,  cluster_size],
+                                           initializer = tf.random_normal_initializer(stddev=1 / math.sqrt(feature_size))
+                                           )
+        
+        
+        a = tf.multiply(a_sum,cluster_weights2)  # a_sum cluster_weights2 对应元素相乘   (?, 512, 64)
+        
+        #######################################################################################################################
+        # 第2步：  被减数  论文公式6展开前半部分 a(x)*x(j)
+
+        activation = tf.transpose(activation,perm=[0,2,1])                                    # (?, 64, 6)
+        reshaped_input = tf.reshape(reshaped_input,[-1,max_samples, feature_size])  # (?, 6, 512)
+
+        vlad = tf.matmul(activation,reshaped_input)                                           # (?, 64, 512)
+
+        vlad = tf.transpose(vlad,perm=[0,2,1])                                                # (?, 512, 64)
+
+        # 第3步： 相减的结果
+        vlad = tf.subtract(vlad,a)
+        
+        #######################################################################################################################
+        vlad = tf.nn.l2_normalize(vlad,1)
+        vlad = tf.reshape(vlad,[-1, cluster_size*feature_size])
+        vlad = tf.nn.l2_normalize(vlad,1)
+        vlad = slim.batch_norm( vlad,center=True,scale=True,is_training=True, scope="vlad_bn")
+
+        
+        # 主要为了是输出相应维度的向量
+        hidden1_weights = tf.get_variable("hidden1_weights",[cluster_size*feature_size, output_dim],
+                                          initializer=tf.random_normal_initializer(stddev=1 / math.sqrt(cluster_size))
+                                          )
+        vlad = tf.matmul(vlad, hidden1_weights)
+
+    return vlad    
