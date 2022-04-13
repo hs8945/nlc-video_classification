@@ -25,13 +25,13 @@ n_steps_audio=6
 n_input_text = 100
 n_steps_text = 30
 
-# 学习率参数
+
 learning_rate =0.01
 lr=tf.Variable(learning_rate,trainable=False)
 current_lr=learning_rate
 learning_rate_decay=0.3
 
-# 迭代参数
+
 epoch = 20
 training_iters = 18000  
 display_step = 10
@@ -123,12 +123,11 @@ accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 
 with tf.Session() as sess:
-    sess.run(tf.global_variables_initializer())   #初始化所有参数
+    sess.run(tf.global_variables_initializer())   
 
     for idx in range(epoch):
         step = 1
         print('current lr:',current_lr)
-        # 每一轮次都打乱
         num_examples=train_audio.shape[0]
         perm = numpy.arange(num_examples)
         numpy.random.shuffle(perm)
@@ -146,4 +145,4 @@ with tf.Session() as sess:
         
         current_lr=current_lr * learning_rate_decay
 
-        lr.assign(current_lr).eval()    # 可变学习率赋值
+        lr.assign(current_lr).eval()  
