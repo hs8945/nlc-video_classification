@@ -30,6 +30,6 @@ If the code is useful, please cite it as:
   volume       = {7},
   pages        = {77091--77099},
   year         = {2019},
-}
+}  
 >3.Wang, B., Huang, X., Cao, G. et al. Attention-enhanced joint learning network for micro-video venue classification. Multimed Tools Appl (2023). https://doi.org/10.1007/s11042-023-15699-x
 
