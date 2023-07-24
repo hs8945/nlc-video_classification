@@ -21,6 +21,51 @@ def dense_to_one_hot(labels_dense, num_classes):
     labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
     return labels_one_hot
   
+def ENCL(input_tensor,y):
+    # #Non-local softmax归一化,embedded gaussian模式
+    # theta = conv2d(input_tensor, channels, channels // 2, 1)
+    theta_w_conv = weight_variable([1,1,3,3])
+    theta_b_conv = bias_variable([3])
+    theta = conv2d(cnn_data,theta_w_conv)+theta_b_conv
+    theta = tf.reshape(theta, shape=[-1, 256, 3])
+
+
+
+    phi_w_conv = weight_variable([1,1,3,3])
+    phi_b_conv = bias_variable([3])
+    phi = conv2d(cnn_data,phi_w_conv)+phi_b_conv
+    phi = tf.reshape(phi, shape=[-1, 256, 3])
+
+
+    f = tf.matmul(theta, phi, transpose_b=True)  #256*256
+    phi_shape = phi.get_shape().as_list()
+    f = tf.reshape(f, shape=[-1, 256, phi_shape[1]])    
+    f = tf.nn.softmax(f, axis=-1)
+
+
+
+    g_w_conv = weight_variable([1,1,3,3])
+    g_b_conv = bias_variable([3])
+    g = conv2d(cnn_data,g_w_conv)+g_b_conv
+    g = tf.reshape(g, shape=[-1, 256,3])
+
+    y_new = tf.matmul(g,f,transpose_a=True,transpose_b=True)
+    g = tf.reshape(g,shape=[-1,256,1,3])
+
+
+# #ENL
+    g_new_w_conv = weight_variable([1,1,3,1])
+    g_new_b_conv = bias_variable([1])
+    g_new = conv2d(g,g_new_w_conv)+g_new_b_conv
+    g_new = tf.reshape(g_new,shape=[-1,1,256])
+    g_new = tf.nn.softmax(g_new,axis=-1)
+    g = tf.reshape(g,shape=[-1,256,3])
+    g_new = tf.matmul(g_new,g)
+
+    g_new = tf.reshape(g_new,shape=[-1,1,1,3])# 1,1,C
+    y_m = tf.reshape(y_new,shape=[-1,256,1,3])
+    output_tensor = g_new + y_m
+    return output_tensor
     
 def ecanet_layer(x): 
         k_size = 3
