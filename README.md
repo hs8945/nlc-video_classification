@@ -31,5 +31,4 @@ If the code is useful, please cite it as:
   pages        = {77091--77099},
   year         = {2019},
 }
->3.
 
