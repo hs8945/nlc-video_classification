@@ -17,8 +17,6 @@ If the code is useful, please cite it as:
  pages={1415-1424},
  year={2016},
 }  
-
-
 >2.@article{DBLP:journals/access/LiuHCZSY19,
   author       = {Wei Liu and
                   Xianglin Huang and
