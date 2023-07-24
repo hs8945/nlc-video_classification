@@ -6,6 +6,7 @@ some useful modules are included in module.py, the whole train stage just like t
 The core modules are ENL, NNeXtVLAD and context gate in module.py.
 
 **Citation** 
+
 If the code is useful, please cite it as:
 
 @inproceedings{Zhang2016Shorter,
