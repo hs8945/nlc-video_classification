@@ -11,10 +11,10 @@ The core modules are ENL, NNeXtVLAD and context gate in module.py.
 If the code is useful, please cite it as:
 
 >1、@inproceedings{Zhang2016Shorter,  
-  title={Shorter-is-Better: Venue Category Estimation from Micro-Video},
-  author={Zhang, Jianglong and Nie, Liqiang and Wang, Xiang and He, Xiangnan and Huang, Xianglin and Chua, Tat Seng},
-  booktitle={ACM on Multimedia Conference},
-  pages={1415-1424},
-  year={2016},
-}
+  >title={Shorter-is-Better: Venue Category Estimation from Micro-Video},
+  >author={Zhang, Jianglong and Nie, Liqiang and Wang, Xiang and He, Xiangnan and Huang, Xianglin and Chua, Tat Seng},
+  >booktitle={ACM on Multimedia Conference},
+  >pages={1415-1424},
+  >year={2016},
+>}
 
